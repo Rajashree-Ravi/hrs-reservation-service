@@ -7,7 +7,9 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import com.hrs.reservationservice.models.PaymentDto;
+import com.hrs.reservationservice.models.PaymentStatus;
 import com.hrs.reservationservice.models.ReservationDto;
+import com.hrs.reservationservice.models.ReservationStatus;
 import com.hrs.reservationservice.services.ReservationService;
 
 import lombok.RequiredArgsConstructor;
@@ -36,9 +38,17 @@ public class TopicListener {
 		log.info("Payment : {}", payload.value());
 
 		PaymentDto paymentDto = payload.value();
-		
+
 		ReservationDto reservation = reservationService.getReservationById(paymentDto.getReservationId());
 		reservation.setPaymentId(paymentDto.getId());
+
+		if (paymentDto.getStatus().equals(PaymentStatus.SUCCESS))
+			reservation.setStatus(ReservationStatus.BOOKED);
+		else if (paymentDto.getStatus().equals(PaymentStatus.FAILED))
+			reservation.setStatus(ReservationStatus.RESERVED);
+		else if (paymentDto.getStatus().equals(PaymentStatus.PENDING))
+			reservation.setStatus(ReservationStatus.RESERVED);
+
 		reservationService.updateReservation(reservation.getId(), reservation);
 
 	}
@@ -54,7 +64,17 @@ public class TopicListener {
 		PaymentDto paymentDto = payload.value();
 
 		ReservationDto reservation = reservationService.getReservationById(paymentDto.getReservationId());
-		reservation.setPaymentId(paymentDto.getId());
+
+		if (paymentDto.getStatus().equals(PaymentStatus.SUCCESS))
+			reservation.setStatus(ReservationStatus.CANCELLED);
+		else if (paymentDto.getStatus().equals(PaymentStatus.FAILED)) {
+			// Add retry logic
+			reservation.setStatus(ReservationStatus.RESERVED);
+		} else if (paymentDto.getStatus().equals(PaymentStatus.PENDING)) {
+			// Check payment status again
+			reservation.setStatus(ReservationStatus.RESERVED);
+		}
+
 		reservationService.updateReservation(reservation.getId(), reservation);
 
 	}
