@@ -2,16 +2,18 @@ package com.hrs.reservationservice.entities;
 
 import java.time.LocalDate;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
-import com.hrs.reservationservice.models.ReservationInfo;
 import com.hrs.reservationservice.models.ReservationStatus;
 
 import lombok.AllArgsConstructor;
@@ -48,6 +50,8 @@ public class Reservation {
 	@NotNull(message = "Invalid status: Reservation status may not be null.")
 	private ReservationStatus status;
 
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "reservation_info_id", referencedColumnName = "id")
 	@NotNull(message = "Invalid reservationInfo: Reservation details may not be null.")
 	private ReservationInfo reservationInfo;
 
