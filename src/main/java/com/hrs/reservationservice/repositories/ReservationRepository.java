@@ -9,5 +9,7 @@ import com.hrs.reservationservice.entities.Reservation;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
 	List<Reservation> findByCustomerId(Long customerId);
+	
+	List<Reservation> findByPaymentId(Long paymentId);
 
 }

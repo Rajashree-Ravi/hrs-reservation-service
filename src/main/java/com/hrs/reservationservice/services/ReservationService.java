@@ -11,6 +11,8 @@ public interface ReservationService {
 	ReservationDto getReservationById(@Valid long id);
 
 	List<ReservationDto> getReservationsByCustomerId(@Valid long customerId);
+	
+	List<ReservationDto> getReservationsByPaymentId(@Valid long paymentId);
 
 	ReservationDto createReservation(@Valid ReservationDto reservation);
 

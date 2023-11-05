@@ -54,6 +54,18 @@ public class ReservationServiceImpl implements ReservationService {
 	}
 
 	/**
+	 * Retrieves all the existing reservations with payment id
+	 */
+	@Override
+	public List<ReservationDto> getReservationsByPaymentId(@Valid long paymentId) {
+		List<ReservationDto> reservations = new ArrayList<>();
+		reservationRepository.findByPaymentId(paymentId).forEach(reservation -> {
+			reservations.add(mapper.map(reservation, ReservationDto.class));
+		});
+		return reservations;
+	}
+
+	/**
 	 * Makes a new reservation
 	 */
 	@Override

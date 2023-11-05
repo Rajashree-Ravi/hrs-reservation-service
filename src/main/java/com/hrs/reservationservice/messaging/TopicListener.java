@@ -7,6 +7,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import com.hrs.reservationservice.models.PaymentDto;
+import com.hrs.reservationservice.models.ReservationDto;
 import com.hrs.reservationservice.services.ReservationService;
 
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,11 @@ public class TopicListener {
 		log.info("Payment : {}", payload.value());
 
 		PaymentDto paymentDto = payload.value();
-		//reservationService.updatePaymentStatus();
+		
+		ReservationDto reservation = reservationService.getReservationById(paymentDto.getReservationId());
+		reservation.setPaymentId(paymentDto.getId());
+		reservationService.updateReservation(reservation.getId(), reservation);
+
 	}
 
 	@KafkaListener(id = "${consumer.config.refund.topic.name}", topics = "${consumer.config.refund.topic.name}", groupId = "${consumer.config.group-id}")
@@ -47,7 +52,11 @@ public class TopicListener {
 		log.info("Payment : {}", payload.value());
 
 		PaymentDto paymentDto = payload.value();
-		//reservationService.updatePaymentStatus();
+
+		ReservationDto reservation = reservationService.getReservationById(paymentDto.getReservationId());
+		reservation.setPaymentId(paymentDto.getId());
+		reservationService.updateReservation(reservation.getId(), reservation);
+
 	}
 
 }

@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
+import com.hrs.reservationservice.models.ReservationInfo;
 import com.hrs.reservationservice.models.ReservationStatus;
 
 import lombok.AllArgsConstructor;
@@ -33,8 +34,9 @@ public class Reservation {
 	@NotNull(message = "Invalid customerId: CustomerId may not be null.")
 	private Long customerId;
 
-	@NotNull(message = "Invalid hotelId: HotelId may not be null.")
 	private Long hotelId;
+
+	private Long paymentId;
 
 	@NotNull(message = "Invalid startDate: Start Date may not be null.")
 	private LocalDate startDate;
@@ -46,12 +48,12 @@ public class Reservation {
 	@NotNull(message = "Invalid status: Reservation status may not be null.")
 	private ReservationStatus status;
 
-	@NotNull(message = "Invalid paymentReference: Payment reference may not be null.")
-	private Long paymentReference;
+	@NotNull(message = "Invalid reservationInfo: Reservation details may not be null.")
+	private ReservationInfo reservationInfo;
 
 	public Reservation updateWith(Reservation reservation) {
-		return new Reservation(this.id, reservation.customerId, reservation.hotelId, reservation.startDate,
-				reservation.endDate, reservation.status, reservation.paymentReference);
+		return new Reservation(this.id, reservation.customerId, reservation.hotelId, reservation.paymentId,
+				reservation.startDate, reservation.endDate, reservation.status, reservation.reservationInfo);
 	}
 
 }
