@@ -15,7 +15,10 @@ import org.springframework.stereotype.Service;
 import com.hrs.reservationservice.entities.Reservation;
 import com.hrs.reservationservice.exceptions.ReservationNotFoundException;
 import com.hrs.reservationservice.models.ReservationDto;
+import com.hrs.reservationservice.models.ReservationInfoDto;
+import com.hrs.reservationservice.models.RoomDto;
 import com.hrs.reservationservice.repositories.ReservationRepository;
+import com.hrs.reservationservice.services.HotelServiceFeign;
 import com.hrs.reservationservice.services.ReservationService;
 
 @Service
@@ -28,6 +31,9 @@ public class ReservationServiceImpl implements ReservationService {
 
 	@Autowired
 	private ModelMapper mapper;
+
+	@Autowired
+	private HotelServiceFeign hotelServiceFeign;
 
 	/**
 	 * Retrieves a reservation with unique reservation id
@@ -70,8 +76,30 @@ public class ReservationServiceImpl implements ReservationService {
 	 */
 	@Override
 	public ReservationDto createReservation(@Valid ReservationDto reservationDto) {
-		Reservation reservation = mapper.map(reservationDto, Reservation.class);
-		return mapper.map(reservationRepository.save(reservation), ReservationDto.class);
+
+		ReservationInfoDto reservationInfoDto = reservationDto.getReservationInfoDto();
+		boolean available = hotelServiceFeign.checkAvailability(reservationInfoDto.getRoomType());
+
+		if (available) {
+			RoomDto room = new RoomDto();
+			room.setCustomerId(reservationDto.getCustomerId());
+			room.setOccupancyStartDate(reservationDto.getStartDate());
+			room.setOccupancyEndDate(reservationDto.getEndDate());
+			room.setNumberOfRooms(reservationInfoDto.getNumberOfRooms());
+			room.setNumberOfAdults(reservationInfoDto.getNumberOfAdults());
+			room.setNumberOfChildren(reservationInfoDto.getNumberOfChildren());
+
+			RoomDto createdRoom = hotelServiceFeign.createRoom(room, reservationInfoDto.getRoomType());
+			reservationDto.setHotelId(createdRoom.getId());
+
+			Reservation reservation = mapper.map(reservationDto, Reservation.class);
+			return mapper.map(reservationRepository.save(reservation), ReservationDto.class);
+
+		} else {
+			throw new ReservationNotFoundException(
+					"Room not available with room type: " + reservationInfoDto.getRoomType());
+		}
+
 	}
 
 	/**
